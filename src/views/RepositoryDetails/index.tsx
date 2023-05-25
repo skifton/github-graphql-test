@@ -120,7 +120,7 @@ const RepositoryDetails: React.FC = () => {
                   </p>
                 )}
               </div>
-              <div className="space-y-2 min-w-32 w-full md:w-1/5">
+              <div className="space-y-2 min-w-32 mb-10 w-full md:w-1/5">
                 <h2 className="text-lg font-semibold">
                   <FormattedMessage id="LANGUAGES" />
                 </h2>
