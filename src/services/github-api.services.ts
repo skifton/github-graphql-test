@@ -5,8 +5,6 @@ import { IVariables } from "../models/repository.model";
 const BASE_URL = "https://api.github.com/graphql";
 const TOKEN = import.meta.env.VITE_REACT_APP_GITHUB_API_KEY;
 
-console.log(TOKEN);
-
 export const getGithubRepositories = async (variables: IVariables) => {
   const query = `
     query($queryString: String!, $first: Int!, $after: String) {

@@ -23,5 +23,6 @@
   "REPOSITORY.DESCRIPTION": "Repository description",
   "REPOSITORY.LANGUAGE": "Language using in this project",
   "OWNER.NAME": "Owner name",
-  "LOADING": "Loading..."
+  "LOADING": "Loading...",
+  "SHOW_MORE": "Show more..."
 }

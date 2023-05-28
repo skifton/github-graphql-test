@@ -35,7 +35,7 @@ const RepositoryCard: React.FC<IProps> = ({ repository, selectRepository }) => {
             aria-label={intl.formatMessage({ id: "REPOSITORY.STARS" })}
             tabIndex={0}
           >
-            {repository.stargazers.totalCount}
+            {repository.stargazers?.totalCount}
           </p>
         </div>
         <p

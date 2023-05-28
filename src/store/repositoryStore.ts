@@ -4,18 +4,17 @@ import { IRepository, IRepositoryDetails } from "../models/repository.model";
 interface RepositoryState {
   searchQuery: string;
   currentPage: number;
-  previousPage: number;
+  hasNextPage: boolean;
   repositories: IRepository[];
   repository: IRepositoryDetails | null;
   totalPages: number;
   loading: boolean;
-  userRepositoriesStartCursor: string | null;
   userRepositoriesEndCursor: string | null;
-  updateUserRepositoriesStartCursor: (startCursor: string) => void;
   updateUserRepositoriesEndCursor: (endCursor: string) => void;
+  updateUserRepositories: (newRepositories: IRepository[]) => void;
   updateSearchQuery: (query: string) => void;
   updateCurrentPage: (page: number) => void;
-  updatePreviousPage: (page: number) => void;
+  updateHasNextPage: (nextPage: boolean) => void;
   updateRepositories: (repositories: IRepository[]) => void;
   updateRepository: (repository: IRepositoryDetails) => void;
   updateTotalPages: (totalPages: number) => void;
@@ -26,20 +25,21 @@ const useRepositoryStore = create<RepositoryState>(
   (set: SetState<RepositoryState>) => ({
     searchQuery: "",
     currentPage: 1,
-    previousPage: 1,
+    hasNextPage: false,
     repositories: [],
     repository: null,
     totalPages: 0,
     loading: false,
-    userRepositoriesStartCursor: null,
     userRepositoriesEndCursor: null,
-    updateUserRepositoriesStartCursor: (startCursor) =>
-      set({ userRepositoriesStartCursor: startCursor }),
     updateUserRepositoriesEndCursor: (endCursor) =>
       set({ userRepositoriesEndCursor: endCursor }),
+    updateUserRepositories: (newRepositories: any) =>
+      set((prev: any) => {
+        return { repositories: [...prev, newRepositories] };
+      }),
     updateSearchQuery: (query) => set({ searchQuery: query }),
     updateCurrentPage: (page) => set({ currentPage: page }),
-    updatePreviousPage: (page) => set({ previousPage: page }),
+    updateHasNextPage: (nextPage) => set({ hasNextPage: nextPage }),
     updateRepositories: (repositories) => set({ repositories }),
     updateRepository: (repository) => set({ repository: repository }),
     updateTotalPages: (totalPages) => set({ totalPages }),

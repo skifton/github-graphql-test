@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useIntl } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import LayoutWrapper from "../../components/LayoutWrapper";
 import Input from "../../components/Input";
@@ -21,17 +21,15 @@ const Repositories: React.FC = () => {
   const {
     searchQuery,
     currentPage,
-    previousPage,
+    hasNextPage,
     repositories,
     totalPages,
     loading,
-    userRepositoriesStartCursor,
     userRepositoriesEndCursor,
-    updateUserRepositoriesStartCursor,
     updateUserRepositoriesEndCursor,
     updateSearchQuery,
     updateCurrentPage,
-    updatePreviousPage,
+    updateHasNextPage,
     updateRepositories,
     updateTotalPages,
     setLoading,
@@ -52,7 +50,6 @@ const Repositories: React.FC = () => {
   };
 
   const pageChangeHandler = (page: number) => {
-    updatePreviousPage(currentPage);
     updateCurrentPage(page);
   };
 
@@ -62,35 +59,49 @@ const Repositories: React.FC = () => {
 
   const debouncedSearchValue = useDebounce(searchQuery, 500);
 
+  const loadMoreUserRepositories = async () => {
+    setLoading(true);
+
+    const variables = {
+      queryString: debouncedSearchValue,
+      first: 10,
+      after: userRepositoriesEndCursor,
+    };
+
+    try {
+      const response =
+        debouncedSearchValue.trim() === ""
+          ? await getCurrentUserRepositories(variables)
+          : await getGithubRepositories(variables);
+
+      const { pageInfo, nodes } = response.data.data.viewer.repositories;
+
+      updateHasNextPage(pageInfo.hasNextPage);
+      updateUserRepositoriesEndCursor(pageInfo.endCursor);
+
+      updateRepositories([...repositories, ...nodes]);
+    } catch (error) {
+      console.error("Failed to fetch repositories.", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     const fetchRepositories = async () => {
       setLoading(true);
 
       const after =
         debouncedSearchValue.trim() === ""
-          ? currentPage > previousPage
-            ? userRepositoriesEndCursor
-            : null
+          ? userRepositoriesEndCursor
           : (currentPage - 1) * 10 > 0
           ? btoa(`cursor:${(currentPage - 1) * 10}`)
           : btoa(`cursor:0`);
-
-      console.log("after: ", after);
-
-      const before =
-        debouncedSearchValue.trim() === ""
-          ? currentPage < previousPage
-            ? userRepositoriesStartCursor
-            : null
-          : null;
-
-      console.log("before: ", before);
 
       const variables = {
         queryString: debouncedSearchValue,
         first: 10,
         after,
-        before,
       };
 
       try {
@@ -99,12 +110,12 @@ const Repositories: React.FC = () => {
             ? await getCurrentUserRepositories(variables)
             : await getGithubRepositories(variables);
 
-        const { repositoryCount, pageInfo, totalCount, nodes } =
+        const { repositoryCount, totalCount, pageInfo, nodes } =
           debouncedSearchValue.trim() === ""
             ? response.data.data.viewer.repositories
             : response.data.data.search;
 
-        updateUserRepositoriesStartCursor(pageInfo.startCursor);
+        updateHasNextPage(pageInfo.hasNextPage);
         updateUserRepositoriesEndCursor(pageInfo.endCursor);
         updateTotalPages(repositoryCount || totalCount);
         updateRepositories(nodes);
@@ -119,11 +130,12 @@ const Repositories: React.FC = () => {
   }, [
     debouncedSearchValue,
     currentPage,
-    previousPage,
     updateCurrentPage,
     setLoading,
     updateRepositories,
     updateTotalPages,
+    updateHasNextPage,
+    updateUserRepositoriesEndCursor,
   ]);
 
   useEffect(() => {
@@ -156,17 +168,26 @@ const Repositories: React.FC = () => {
             selectRepository={selectRepositoryHandler}
           />
         ) : (
-          <div className="flex items-center justify-center min-h-screen ">
+          <div className="flex items-center justify-center min-h-screen">
             <LoadingSpinner />
           </div>
         )}
 
-        <Pagination
-          currentPage={Number(currentPage)}
-          totalCount={totalPages}
-          pageSize={10}
-          onPageChange={pageChangeHandler}
-        />
+        {debouncedSearchValue.trim() !== "" ? (
+          <Pagination
+            currentPage={Number(currentPage)}
+            totalCount={totalPages}
+            pageSize={10}
+            onPageChange={pageChangeHandler}
+          />
+        ) : hasNextPage ? (
+          <p
+            onClick={loadMoreUserRepositories}
+            className="text-gray-500 hover:cursor-pointer flex justify-center"
+          >
+            <FormattedMessage id="SHOW_MORE" />
+          </p>
+        ) : null}
       </LayoutWrapper>
     </main>
   );
