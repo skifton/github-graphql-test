@@ -12,7 +12,7 @@ const RepositoryList: React.FC<IProps> = ({
   selectRepository,
 }) => {
   return (
-    <div>
+    <div className="py-10">
       <ul className="space-y-4">
         {repositories.map((repo) => (
           <li key={repo.id}>

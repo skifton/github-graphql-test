@@ -148,7 +148,7 @@ const Repositories: React.FC = () => {
 
   return (
     <main>
-      <LayoutWrapper className="space-y-10">
+      <LayoutWrapper>
         <Input
           id={intl.formatMessage({ id: "INPUT.SEARCH" })}
           wrapperClassName="mt-10 flex justify-center sm:justify-end"
@@ -181,12 +181,12 @@ const Repositories: React.FC = () => {
             onPageChange={pageChangeHandler}
           />
         ) : hasNextPage ? (
-          <p
+          <button
             onClick={loadMoreUserRepositories}
-            className="text-gray-500 hover:cursor-pointer flex justify-center"
+            className="text-gray-500 hover:cursor-pointer w-full flex justify-center mb-10"
           >
             <FormattedMessage id="SHOW_MORE" />
-          </p>
+          </button>
         ) : null}
       </LayoutWrapper>
     </main>

@@ -49,9 +49,9 @@ export const getGithubRepositories = async (variables: IVariables) => {
 
 export const getCurrentUserRepositories = async (variables: IVariables) => {
   const query = `
-    query($first: Int!, $after: String, $before: String) {
+    query($first: Int!, $after: String) {
       viewer {
-        repositories(first: $first, after: $after, before: $before) {
+        repositories(first: $first, after: $after, orderBy: { field: CREATED_AT, direction: DESC }) {
           totalCount
           pageInfo {
             hasNextPage
